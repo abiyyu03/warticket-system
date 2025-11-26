@@ -1,0 +1,11 @@
+CREATE TABLE seats (
+    id BIGSERIAL PRIMARY KEY,
+    code VARCHAR(255) NOT NULL UNIQUE,
+    available VARCHAR(50) NOT NULL DEFAULT 'true',
+
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP
+);
+
+alter table seats ADD COLUMN type VARCHAR(45) NOT NULL DEFAULT 'REGULAR';
