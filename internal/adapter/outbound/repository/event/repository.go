@@ -1,17 +1,17 @@
-package userEvent
+package event
 
 import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
-	ICreate
+	IGetOneById
 }
 
-type user struct {
+type event struct {
 	Package pkg.Package
 }
 
 func New(pkg pkg.Package) Repository {
-	return &user{
+	return &event{
 		Package: pkg,
 	}
 }
