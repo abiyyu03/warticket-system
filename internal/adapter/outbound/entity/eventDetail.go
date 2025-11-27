@@ -13,6 +13,7 @@ type EventDetail struct {
 	Price         float64 `gorm:"column:price;not null;check:price >= 0" json:"price"`
 	AvailableSlot int64   `gorm:"column:available_slot;not null;check:available_slot > 0" json:"available_slot"`
 	Status        string  `gorm:"column:status;not null;default:'active';index" json:"status"`
+	Event         Event   `gorm:"foreignKey:EventID;references:ID" json:"event"`
 }
 
 func (EventDetail) TableName() string {

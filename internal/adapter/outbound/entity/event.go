@@ -15,6 +15,7 @@ type Event struct {
 	Status      string     `gorm:"column:status;not null;default:'active';index" json:"status"`
 	StartDate   time.Time  `gorm:"column:start_date;not null;index" json:"start_date"`
 	EndDate     *time.Time `gorm:"column:end_date" json:"end_date"`
+	Location    Location   `gorm:"foreignKey:LocationID;references:ID" json:"location"`
 }
 
 func (Event) TableName() string {
