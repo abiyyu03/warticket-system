@@ -2,6 +2,7 @@ package ticket
 
 import (
 	"context"
+	baseEntity "go-projects/hexagonal-example/internal/adapter/inbound/rest/entity"
 	"go-projects/hexagonal-example/internal/adapter/inbound/rest/ticket/entity"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,19 +14,17 @@ func (h *Handler) Claim(fctx *fiber.Ctx) error {
 		request entity.ClaimTicketRequest
 	)
 
-	err := h.Service.Ticket.Claim(ctx, request.ToUcEntity())
+	response, err := h.Service.Ticket.Claim(ctx, request.ToUcEntity())
 	if err != nil {
 		return err
 	}
 
-	return nil
-
-	// return fctx.Status(fiber.StatusOK).JSON(
-	// 	response.ToResponse(
-	// 		"User fetched successfully",
-	// 		fiber.StatusOK,
-	// 		users,
-	// 		nil,
-	// 	),
-	// )
+	return fctx.Status(fiber.StatusOK).JSON(
+		baseEntity.BaseResponse{}.ToResponse(
+			"Claim Successfully",
+			fiber.StatusOK,
+			response,
+			nil,
+		),
+	)
 }

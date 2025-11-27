@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"go-projects/hexagonal-example/internal/adapter/inbound/rest/user/entity"
+	"go-projects/hexagonal-example/internal/adapter/inbound/rest/entity"
 
 	"github.com/gofiber/fiber/v2"
 )

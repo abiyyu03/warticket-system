@@ -2,7 +2,8 @@ package user
 
 import (
 	"context"
-	"go-projects/hexagonal-example/internal/adapter/inbound/rest/user/entity"
+	"go-projects/hexagonal-example/internal/adapter/inbound/rest/entity"
+	userEntity "go-projects/hexagonal-example/internal/adapter/inbound/rest/user/entity"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,8 +11,7 @@ import (
 func (h *Handler) RegisterUser(fctx *fiber.Ctx) error {
 	var ctx = context.Background()
 	var (
-		response entity.BaseResponse
-		request  entity.CreateUserRequest
+		request userEntity.CreateUserRequest
 	)
 
 	if err := fctx.BodyParser(&request); err != nil {
@@ -24,7 +24,7 @@ func (h *Handler) RegisterUser(fctx *fiber.Ctx) error {
 	}
 
 	return fctx.Status(fiber.StatusCreated).JSON(
-		response.ToResponse(
+		entity.BaseResponse.ToResponse(
 			"User created successfully",
 			fiber.StatusCreated,
 			nil,
