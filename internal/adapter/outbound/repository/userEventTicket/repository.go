@@ -4,14 +4,15 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	ICreate
+	IUpdateByCode
 }
 
-type user struct {
+type userEventTicket struct {
 	Package pkg.Package
 }
 
 func New(pkg pkg.Package) Repository {
-	return &user{
+	return &userEventTicket{
 		Package: pkg,
 	}
 }

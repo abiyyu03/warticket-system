@@ -12,4 +12,5 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 
 	app.Post("/init-order", i.Ticket.InitOrder)
 	app.Post("/claim", i.Ticket.ClaimAndPurchase)
+	app.Post("/redeem", i.Ticket.Redeem)
 }
