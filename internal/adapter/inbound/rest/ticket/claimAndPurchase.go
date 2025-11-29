@@ -8,20 +8,20 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func (h *Handler) Claim(fctx *fiber.Ctx) error {
+func (h *Handler) ClaimAndPurchase(fctx *fiber.Ctx) error {
 	var ctx = context.Background()
 	var (
 		request entity.ClaimTicketRequest
 	)
 
-	response, err := h.Service.Ticket.Claim(ctx, request.ToUcEntity())
+	response, err := h.Service.Ticket.ClaimAndPurchase(ctx, request.ToUcEntity())
 	if err != nil {
 		return err
 	}
 
 	return fctx.Status(fiber.StatusOK).JSON(
 		baseEntity.BaseResponse{}.ToResponse(
-			"Claim Successfully",
+			"Ticket Purchase Successfully",
 			fiber.StatusOK,
 			response,
 			nil,

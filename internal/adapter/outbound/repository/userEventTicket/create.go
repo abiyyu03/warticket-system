@@ -8,7 +8,7 @@ import (
 )
 
 func (r user) Create(ctx context.Context, orm *gorm.DB, req entity.UserEventTicket) error {
-	if err := orm.WithContext(ctx).Create(&req).Error; err != nil {
+	if err := orm.WithContext(ctx).Model(&entity.UserEventTicket{}).Create(&req).Error; err != nil {
 		return err
 	}
 

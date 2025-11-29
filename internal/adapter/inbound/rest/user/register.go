@@ -24,7 +24,7 @@ func (h *Handler) RegisterUser(fctx *fiber.Ctx) error {
 	}
 
 	return fctx.Status(fiber.StatusCreated).JSON(
-		entity.BaseResponse.ToResponse(
+		entity.BaseResponse{}.ToResponse(
 			"User created successfully",
 			fiber.StatusCreated,
 			nil,

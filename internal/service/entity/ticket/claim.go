@@ -6,20 +6,17 @@ import (
 )
 
 type (
-	ClaimTicketRequest struct {
-		ChairCode *string `json:"chair_code"` // book for vip only
-		Date      string  `json:"date"`
-		EventID   int64   `json:"event_id"`
-	}
+	ClaimTicketRequest struct{}
 
-	ClaimTicketResponse struct {
+	ClaimAndPurchaseTicketResponse struct {
 		Status string `json:"status"` //
 	}
 )
 
-func (r ClaimTicketRequest) ToObSeat() entity.Seat {
+func (r ClaimTicketRequest) ToObSeat(chairCode string) entity.Seat {
 	return entity.Seat{
-		Code: *r.ChairCode,
+		Code:      chairCode,
+		Available: true,
 	}
 }
 func (r ClaimTicketRequest) ToObSeatLocation(locationId int64) entity.Seat {
@@ -28,15 +25,21 @@ func (r ClaimTicketRequest) ToObSeatLocation(locationId int64) entity.Seat {
 	}
 }
 
-func (r ClaimTicketRequest) ToObEvent() entity.Event {
+func (r ClaimTicketRequest) ToObEvent(eventId int64) entity.Event {
 	return entity.Event{
-		ID: r.EventID,
+		ID: eventId,
 	}
 }
 
-func (r ClaimTicketRequest) ToObEventDetail(ticketType string) entity.EventDetail {
+func (r ClaimTicketRequest) ToObGetCache(userId int64) entity.CacheInitOrderRequest {
+	return entity.CacheInitOrderRequest{
+		UserID: userId,
+	}
+}
+
+func (r ClaimTicketRequest) ToObEventDetail(eventId int64, ticketType string) entity.EventDetail {
 	return entity.EventDetail{
-		EventID:    r.EventID,
+		EventID:    eventId,
 		TicketType: ticketType,
 	}
 }

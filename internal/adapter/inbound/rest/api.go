@@ -9,4 +9,7 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 
 	app.Post("/register", i.User.RegisterUser)
 	app.Get("/users", i.User.GetAll)
+
+	app.Post("/init-order", i.Ticket.InitOrder)
+	app.Post("/claim", i.Ticket.ClaimAndPurchase)
 }

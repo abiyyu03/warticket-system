@@ -6,8 +6,9 @@ import (
 )
 
 type TicketService interface {
-	IClaim
+	IClaimAndPurchase
 	IRedeem
+	IInitOrder
 }
 
 type service struct {
