@@ -4,7 +4,8 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	IGetOne
-	IUpdate
+	IUpdateByCode
+	IUpdateStatus
 	IGetSeatsByLocation
 }
 

@@ -9,6 +9,7 @@ var (
 type Cache interface {
 	IGetInitOrder
 	ISetInitOrder
+	IClearInitOrder
 }
 
 type ticketCache struct {

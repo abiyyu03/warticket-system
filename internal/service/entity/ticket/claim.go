@@ -19,6 +19,14 @@ func (r ClaimTicketRequest) ToObSeat(chairCode string) entity.Seat {
 		Available: true,
 	}
 }
+
+func (r ClaimTicketRequest) ToObSeatUnavailable(seatId int64) entity.Seat {
+	return entity.Seat{
+		ID:        seatId,
+		Available: false,
+	}
+}
+
 func (r ClaimTicketRequest) ToObSeatLocation(locationId int64) entity.Seat {
 	return entity.Seat{
 		LocationID: locationId,

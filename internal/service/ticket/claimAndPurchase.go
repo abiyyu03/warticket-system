@@ -6,6 +6,7 @@ import (
 	"fmt"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"io"
+	"strings"
 	"time"
 )
 
@@ -48,7 +49,7 @@ func (s service) ClaimAndPurchase(ctx context.Context, req ucEntity.ClaimTicketR
 			return response, err
 		}
 
-		ticketCode, err := s.generateSecureRandomString(16)
+		ticketCode, err := s.generateSecureRandomString(24)
 		if err != nil {
 			trx.Rollback()
 			return response, err
@@ -58,13 +59,24 @@ func (s service) ClaimAndPurchase(ctx context.Context, req ucEntity.ClaimTicketR
 			userId,
 			seatAvailable.ID,
 			eventDetail.ID,
-			ticketCode,
+			strings.ToUpper(ticketCode),
 			parsedTime,
 		))
 		if err != nil {
 			trx.Rollback()
 			return response, err
 		}
+
+		// update seat status
+		err = s.Repository.Seat.UpdateStatus(ctx, orm, req.ToObSeatUnavailable(seatAvailable.ID))
+		if err != nil {
+			trx.Rollback()
+			return response, err
+		}
+
+		// revoke cache
+		s.Cache.Ticket.ClearInitOrder(ctx, req.ToObGetCache(userId))
+
 	}
 	trx.Commit()
 

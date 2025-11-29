@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (r seat) Update(ctx context.Context, orm *gorm.DB, seat entity.Seat) error {
+func (r seat) UpdateByCode(ctx context.Context, orm *gorm.DB, seat entity.Seat) error {
 	if err := orm.WithContext(ctx).
 		Where("code = ?", seat.Code).
 		Updates(&seat).Error; err != nil {
@@ -17,6 +17,6 @@ func (r seat) Update(ctx context.Context, orm *gorm.DB, seat entity.Seat) error 
 	return nil
 }
 
-type IUpdate interface {
-	Update(ctx context.Context, orm *gorm.DB, seat entity.Seat) error
+type IUpdateByCode interface {
+	UpdateByCode(ctx context.Context, orm *gorm.DB, seat entity.Seat) error
 }
