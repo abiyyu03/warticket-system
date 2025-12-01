@@ -6,15 +6,17 @@ import (
 	"fmt"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 )
 
 func (s service) ClaimAndPurchase(ctx context.Context, req ucEntity.ClaimTicketRequest) (ucEntity.ClaimAndPurchaseTicketResponse, error) {
 	var (
-		orm      = s.repository.DB
-		response ucEntity.ClaimAndPurchaseTicketResponse
-		userId   int64 = 1
+		orm       = s.repository.DB
+		response  ucEntity.ClaimAndPurchaseTicketResponse
+		userIdCtx = ctx.Value("x-user-id").(string)
+		userId, _ = strconv.ParseInt(userIdCtx, 10, 64)
 	)
 
 	// check cache availability if already exist, invoke

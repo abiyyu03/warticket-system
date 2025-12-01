@@ -9,9 +9,9 @@ import (
 )
 
 func (h *Handler) Redeem(fctx *fiber.Ctx) error {
-	var ctx = context.Background()
 	var (
 		request entity.RedeemRequest
+		ctx     = context.WithValue(fctx.Context(), "x-user-id", fctx.Get("x-user-id"))
 	)
 
 	if err := fctx.BodyParser(&request); err != nil {

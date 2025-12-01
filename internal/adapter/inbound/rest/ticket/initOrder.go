@@ -9,8 +9,8 @@ import (
 )
 
 func (h *Handler) InitOrder(fctx *fiber.Ctx) error {
-	var ctx = context.Background()
 	var (
+		ctx     = context.WithValue(fctx.Context(), "x-user-id", fctx.Get("x-user-id"))
 		request entity.InitOrderRequest
 	)
 

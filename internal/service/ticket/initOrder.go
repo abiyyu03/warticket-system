@@ -4,14 +4,16 @@ import (
 	"context"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"slices"
+	"strconv"
 	"time"
 )
 
 func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (ucEntity.InitOrderResponse, error) {
 	var (
-		orm      = s.repository.DB
-		response ucEntity.InitOrderResponse
-		userId   int64 = 1
+		orm       = s.repository.DB
+		response  ucEntity.InitOrderResponse
+		userIdCtx = ctx.Value("x-user-id").(string)
+		userId, _ = strconv.ParseInt(userIdCtx, 10, 64)
 	)
 
 	// check cache availability if already exist
@@ -22,7 +24,7 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 			if slices.Contains(req.ChairCode, v) && cachedInitOrder.UserID == userId {
 				return ucEntity.InitOrderResponse{
 					Status: "BOOKED_TEMPORARY",
-				}, err 
+				}, err
 			}
 		}
 	}
