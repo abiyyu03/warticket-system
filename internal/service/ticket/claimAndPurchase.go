@@ -7,7 +7,6 @@ import (
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"io"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -37,49 +36,6 @@ func (s service) ClaimAndPurchase(ctx context.Context, req ucEntity.ClaimTicketR
 		}
 	}()
 
-	// check chair availability
-	for _, chairCode := range cachedInitOrder.ChairCode {
-		seatAvailable, err := s.Repository.Seat.GetOne(ctx, orm, req.ToObSeat(chairCode))
-		if err != nil {
-			trx.Rollback()
-			return response, err
-		}
-
-		eventDetail, err := s.Repository.EventDetail.GetOneByEventIdAndType(ctx, orm, req.ToObEventDetail(cachedInitOrder.EventID, seatAvailable.Type))
-		if err != nil {
-			trx.Rollback()
-			return response, err
-		}
-
-		ticketCode, err := s.generateSecureRandomString(24)
-		if err != nil {
-			trx.Rollback()
-			return response, err
-		}
-
-		err = s.Repository.UserEventTicket.Create(ctx, orm, req.ToObTicket(
-			userId,
-			seatAvailable.ID,
-			eventDetail.ID,
-			strings.ToUpper(ticketCode),
-			parsedTime,
-		))
-		if err != nil {
-			trx.Rollback()
-			return response, err
-		}
-
-		// update seat status
-		err = s.Repository.Seat.UpdateStatus(ctx, orm, req.ToObSeatUnavailable(seatAvailable.ID))
-		if err != nil {
-			trx.Rollback()
-			return response, err
-		}
-
-		// revoke cache
-		s.Cache.Ticket.ClearInitOrder(ctx, req.ToObGetCache(userId))
-
-	}
 	trx.Commit()
 
 	response = ucEntity.ClaimAndPurchaseTicketResponse{

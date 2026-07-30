@@ -2,6 +2,7 @@ package ticket
 
 import (
 	"context"
+	"go-projects/hexagonal-example/internal/adapter/outbound/entity"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"slices"
 	"strconv"
@@ -27,6 +28,12 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 				}, err
 			}
 		}
+	}
+
+	// use REDIS DECR
+	err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{EventID: cachedInitOrder.EventID})
+	if err != nil {
+		return response, err
 	}
 
 	parsedEventDate, err := time.Parse("2006-01-02", req.Date)

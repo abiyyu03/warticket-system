@@ -12,7 +12,7 @@ func (s service) Redeem(ctx context.Context, redeem entity.RedeemRequest) error 
 		redeemAt = time.Now()
 	)
 	// redeem by update status
-	err := s.Repository.UserEventTicket.UpdateByCode(ctx, orm, redeem.ToObEntityRedeem(&redeemAt))
+	err := s.Repository.UserTicket.UpdateByCode(ctx, orm, redeem.ToObEntityRedeem(&redeemAt))
 	if err != nil {
 		return err
 	}
