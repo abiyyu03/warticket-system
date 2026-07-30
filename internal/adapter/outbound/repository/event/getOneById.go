@@ -21,14 +21,9 @@ func (r event) GetOneById(ctx context.Context, orm *gorm.DB, event entity.Event)
 	userDate := event.StartDate.Truncate(24 * time.Hour)
 	startDate := eventResult.StartDate.Truncate(24 * time.Hour)
 
-	var endDate *time.Time
-	if eventResult.EndDate != nil {
-		t := eventResult.EndDate.Truncate(24 * time.Hour)
-		endDate = &t
-	}
-
+	// EndDate value nol (IsZero) berarti event satu hari.
 	// Single-day event
-	if endDate == nil {
+	if eventResult.EndDate.IsZero() {
 		if userDate.Equal(startDate) {
 			return eventResult, nil
 		}
@@ -36,7 +31,8 @@ func (r event) GetOneById(ctx context.Context, orm *gorm.DB, event entity.Event)
 	}
 
 	// Multi-day event
-	if userDate.Before(startDate) || userDate.After(*endDate) {
+	endDate := eventResult.EndDate.Truncate(24 * time.Hour)
+	if userDate.Before(startDate) || userDate.After(endDate) {
 		return eventResult, errors.New("input date outside event range")
 	}
 
