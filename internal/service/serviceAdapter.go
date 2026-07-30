@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go-projects/hexagonal-example/internal/service/event"
 	"go-projects/hexagonal-example/internal/service/ticket"
 	"go-projects/hexagonal-example/internal/service/user"
 
@@ -11,6 +12,7 @@ type Service struct {
 	dig.In
 
 	User   user.UserService
+	Event  event.EventService
 	Ticket ticket.TicketService
 }
 
@@ -20,6 +22,10 @@ func Register(container *dig.Container) error {
 	}
 
 	if err := container.Provide(ticket.New); err != nil {
+		return err
+	}
+
+	if err := container.Provide(event.New); err != nil {
 		return err
 	}
 
