@@ -3,13 +3,17 @@ package ticket
 import "go-projects/hexagonal-example/pkg"
 
 var (
-	key = "tickets:initOrder:%d"
+	key          = "tickets:order:%d"
+	keyInit      = "tickets:order:init:%d"
+	keyDecrQuota = "tickets:event:%d"
 )
 
 type Cache interface {
 	IGetInitOrder
 	ISetInitOrder
 	IClearInitOrder
+	IDecrTicketQuota
+	ISetTicketQuota
 }
 
 type ticketCache struct {
