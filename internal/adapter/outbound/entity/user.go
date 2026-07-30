@@ -7,9 +7,10 @@ import (
 type User struct {
 	BaseModel
 	ID       int64  `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Email    string `gorm:"column:email;uniqueIndex;not null" json:"email"`
 	Name     string `gorm:"column:name;not null" json:"name"`
+	Email    string `gorm:"column:email;not null;uniqueIndex" json:"email"`
 	Password string `gorm:"column:password;not null" json:"password"`
+	IsBanned bool   `gorm:"column:is_banned;not null;default:false" json:"is_banned"`
 }
 
 func (User) TableName() string {
