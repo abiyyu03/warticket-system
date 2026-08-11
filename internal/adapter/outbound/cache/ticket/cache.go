@@ -3,7 +3,7 @@ package ticket
 import "go-projects/hexagonal-example/pkg"
 
 var (
-	key          = "tickets:order:%d"
+	key          = "tickets:order:%d:event:%d"
 	keyInit      = "tickets:order:init:%d"
 	keyDecrQuota = "tickets:event:%d"
 )

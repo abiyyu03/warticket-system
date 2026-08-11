@@ -4,14 +4,16 @@ import "encoding/json"
 
 type (
 	CacheInitOrderRequest struct {
-		UserID int64 `json:"user_id"`
+		UserID   int64  `json:"user_id"`
+		EventID  int64  `json:"event_id"`
+		Date     string `json:"date"`
+		Quantity int64  `json:"quantity"`
 	}
 
 	CacheInitOrderResponse struct {
-		ChairCode []string `json:"chair_code"`
-		Date      string   `json:"date"`
-		EventID   int64    `json:"event_id"`
-		UserID    int64    `json:"user_id,omitempty"`
+		Date     string `json:"date"`
+		EventID  int64  `json:"event_id"`
+		Quantity int64  `json:"quantity"`
 	}
 )
 

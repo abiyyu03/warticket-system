@@ -9,7 +9,7 @@ import (
 func (c ticketCache) DecrTicketQuota(ctx context.Context, req entity.DecrTicketQuotaRequest) error {
 	redisKey := fmt.Sprintf(keyDecrQuota, req.EventID)
 
-	err := c.Package.Cache.Client.Decr(ctx, redisKey)
+	err := c.Package.Cache.Client.DecrBy(ctx, redisKey, req.Quantity)
 	if err != nil {
 		return nil
 	}
