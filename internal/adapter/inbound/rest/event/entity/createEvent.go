@@ -1,16 +1,19 @@
 package entity
 
-import ucEntity "go-projects/hexagonal-example/internal/service/entity/event"
+import (
+	ucEntity "go-projects/hexagonal-example/internal/service/entity/event"
+	"mime/multipart"
+)
 
 type (
 	CreateEventRequest struct {
-		Name        string  `json:"name"`
-		Description string  `json:"description"`
-		ImageFile   string  `json:"image_file"`
-		Price       float64 `json:"price"`
-		Quota       int64   `json:"quota"`
-		StartDate   string  `json:"start_date"`
-		EndDate     string  `json:"end_date"`
+		Name        string                `form:"name"`
+		Description string                `form:"description"`
+		ImageFile   *multipart.FileHeader `form:"image_file"`
+		Price       float64               `form:"price"`
+		Quota       int64                 `form:"quota"`
+		StartDate   string                `form:"start_date"`
+		EndDate     string                `form:"end_date"`
 	}
 )
 

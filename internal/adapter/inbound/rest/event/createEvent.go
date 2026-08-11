@@ -1,4 +1,4 @@
-package ticket
+package event
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func (h *Handler) CreateEvent(fctx *fiber.Ctx) error {
 
 	return fctx.Status(fiber.StatusOK).JSON(
 		baseEntity.BaseResponse{}.ToResponse(
-			"Ticket Purchase Successfully",
+			"Event Created Successfully",
 			fiber.StatusCreated,
 			nil,
 			nil,

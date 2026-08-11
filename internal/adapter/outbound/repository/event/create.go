@@ -7,8 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Create menyimpan event. event dilewatkan sebagai pointer supaya ID hasil
-// auto-increment terisi balik dan bisa dipakai memberi key counter kuota di Redis.
 func (r event) Create(ctx context.Context, orm *gorm.DB, event *entity.Event) error {
 	err := orm.WithContext(ctx).Create(event).Error
 	if err != nil {

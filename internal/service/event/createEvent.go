@@ -20,15 +20,11 @@ func (s *service) CreateEvent(ctx context.Context, request ucEntity.CreateEventR
 		return err
 	}
 
-	// create event to db. event dilewatkan sebagai pointer supaya ID hasil
-	// auto-increment terisi balik dan bisa dipakai sebagai key counter Redis.
 	event := request.ToObEntity(start, end)
 	if err := s.Repository.Event.Create(ctx, orm, &event); err != nil {
 		return err
 	}
 
-	// set ticket quota value in redis. counter inilah yang di-DECR setiap
-	// pembelian, jadi diisi sekali di sini dengan kuota awal event.
 	err = s.Cache.Ticket.SetTicketQuota(ctx, obEntity.SetTicketQuotaRequest{
 		EventID: event.ID,
 		Quota:   request.Quota,

@@ -1,4 +1,4 @@
-package ticket
+package event
 
 import (
 	"go-projects/hexagonal-example/internal/service"
