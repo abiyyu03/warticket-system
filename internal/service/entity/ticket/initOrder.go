@@ -7,13 +7,15 @@ import (
 
 type (
 	InitOrderRequest struct {
-		ChairCode []string `json:"chair_code"`
-		Date      string   `json:"date"`
-		EventID   int64    `json:"event_id"`
+		Date     string `json:"date"`
+		EventID  int64  `json:"event_id"`
+		Quantity int64  `json:"quantity"`
 	}
 
 	InitOrderResponse struct {
-		Status string `json:"status"` //
+		Date     string `json:"date"`
+		EventID  int64  `json:"event_id"`
+		Quantity int64  `json:"quantity"`
 	}
 )
 
@@ -30,11 +32,11 @@ func (r InitOrderRequest) ToObGetCache(userId int64) entity.CacheInitOrderReques
 	}
 }
 
-func (r InitOrderRequest) ToObSetCache(userId int64) entity.CacheInitOrderResponse {
-	return entity.CacheInitOrderResponse{
-		ChairCode: r.ChairCode,
-		EventID:   r.EventID,
-		Date:      r.Date,
-		UserID:    userId,
+func (r InitOrderRequest) ToObSetCache(userId int64) entity.CacheInitOrderRequest {
+	return entity.CacheInitOrderRequest{
+		EventID:  r.EventID,
+		Date:     r.Date,
+		Quantity: r.Quantity,
+		UserID:   userId,
 	}
 }

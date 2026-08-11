@@ -6,7 +6,7 @@ import (
 )
 
 type TicketService interface {
-	IClaimAndPurchase
+	IPurchase
 	IRedeem
 	IInitOrder
 }

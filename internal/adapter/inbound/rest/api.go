@@ -7,10 +7,17 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 		return ctx.SendString("OK LURD")
 	})
 
-	app.Post("/register", i.User.RegisterUser)
-	app.Get("/users", i.User.GetAll)
+	v1Api := app.Group("v1/api")
+	user := v1Api.Group("users")
+	user.Get("/", i.User.GetAll)
 
-	app.Post("/init-order", i.Ticket.InitOrder)
-	app.Post("/claim", i.Ticket.ClaimAndPurchase)
-	app.Post("/redeem", i.Ticket.Redeem)
+	v1Api.Post("/register", i.User.RegisterUser)
+
+	ticket := v1Api.Group("tickets")
+	ticket.Post("/init-order", i.Ticket.InitOrder)
+	ticket.Post("/claim", i.Ticket.Purchase)
+	ticket.Post("/redeem", i.Ticket.Redeem)
+
+	event := v1Api.Group("events")
+	event.Post("/", i.Event.CreateEvent)
 }

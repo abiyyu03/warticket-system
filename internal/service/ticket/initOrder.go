@@ -4,7 +4,6 @@ import (
 	"context"
 	"go-projects/hexagonal-example/internal/adapter/outbound/entity"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
-	"slices"
 	"strconv"
 	"time"
 )
@@ -18,22 +17,21 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 	)
 
 	// check cache availability if already exist
-	cachedInitOrder, err := s.Cache.Ticket.GetInitOrder(ctx, req.ToObGetCache(userId))
+	initOrder, err := s.Cache.Ticket.GetInitOrder(ctx, entity.CacheInitOrderRequest{UserID: userId})
 	if err == nil {
-		// another user choose same chair
-		for _, v := range cachedInitOrder.ChairCode {
-			if slices.Contains(req.ChairCode, v) && cachedInitOrder.UserID == userId {
-				return ucEntity.InitOrderResponse{
-					Status: "BOOKED_TEMPORARY",
-				}, err
-			}
-		}
+		return ucEntity.InitOrderResponse{
+			Date:     initOrder.Date,
+			EventID:  initOrder.EventID,
+			Quantity: initOrder.Quantity,
+		}, nil
 	}
 
-	// use REDIS DECR
-	err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{EventID: cachedInitOrder.EventID})
-	if err != nil {
-		return response, err
+	// use REDIS DECR by quantity
+	for i := 0; i < int(req.Quantity); i++ {
+		err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{EventID: initOrder.EventID})
+		if err != nil {
+			return response, err
+		}
 	}
 
 	parsedEventDate, err := time.Parse("2006-01-02", req.Date)
@@ -47,14 +45,16 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		return response, err
 	}
 
-	// caching payload
+	// caching initialization data
 	err = s.Cache.Ticket.SetInitOrder(ctx, req.ToObSetCache(userId))
 	if err != nil {
 		return response, err
 	}
 
 	return ucEntity.InitOrderResponse{
-		Status: "INITIATED_SUCCESS",
+		Date:     req.Date,
+		EventID:  req.EventID,
+		Quantity: req.Quantity,
 	}, nil
 }
 

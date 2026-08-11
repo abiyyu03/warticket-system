@@ -8,13 +8,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func (h *Handler) ClaimAndPurchase(fctx *fiber.Ctx) error {
+func (h *Handler) Purchase(fctx *fiber.Ctx) error {
 	var (
-		request entity.ClaimTicketRequest
+		request entity.PurchaseRequest
 		ctx     = context.WithValue(fctx.Context(), "x-user-id", fctx.Get("x-user-id"))
 	)
 
-	response, err := h.Service.Ticket.ClaimAndPurchase(ctx, request.ToUcEntity())
+	response, err := h.Service.Ticket.Purchase(ctx, request.ToUcEntity())
 	if err != nil {
 		return err
 	}
