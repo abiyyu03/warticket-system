@@ -11,4 +11,4 @@ profile.cov
 go.work
 go.work.sum 
 .env
-docs/*
+/docs/*
