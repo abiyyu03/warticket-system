@@ -19,5 +19,6 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 	ticket.Post("/redeem", i.Ticket.Redeem)
 
 	event := v1Api.Group("events")
+	event.Get("/", i.Event.GetListEvent)
 	event.Post("/", i.Event.CreateEvent)
 }

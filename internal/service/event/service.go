@@ -7,6 +7,7 @@ import (
 
 type EventService interface {
 	ICreateEvent
+	IGetListEvent
 }
 
 type service struct {

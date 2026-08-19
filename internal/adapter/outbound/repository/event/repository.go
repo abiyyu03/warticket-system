@@ -4,7 +4,9 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	IGetOneById
+	IGetOneByCode
 	ICreate
+	IGetAll
 }
 
 type event struct {
