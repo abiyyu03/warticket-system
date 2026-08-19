@@ -10,19 +10,21 @@ type (
 		Date     string `json:"date"`
 		EventID  int64  `json:"event_id"`
 		Quantity int64  `json:"quantity"`
+		Price    int64  `json:"price"`
 	}
 
 	InitOrderResponse struct {
 		Date     string `json:"date"`
 		EventID  int64  `json:"event_id"`
 		Quantity int64  `json:"quantity"`
+		Price    int64  `json:"price"`
 	}
 )
 
-func (r InitOrderRequest) ToObEvent(parsedTime time.Time) entity.Event {
+func (r InitOrderRequest) ToObEvent(parsedDate time.Time) entity.Event {
 	return entity.Event{
 		ID:        r.EventID,
-		StartDate: parsedTime,
+		StartDate: parsedDate,
 	}
 }
 
@@ -38,5 +40,6 @@ func (r InitOrderRequest) ToObSetCache(userId int64) entity.CacheInitOrderReques
 		Date:     r.Date,
 		Quantity: r.Quantity,
 		UserID:   userId,
+		Price:    r.Price,
 	}
 }

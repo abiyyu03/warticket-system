@@ -84,6 +84,23 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 		}
 	}
 
+	// if the event was free
+	if cachedInitOrder.Price == 0 {
+		if err = s.Repository.Transaction.UpdateStatus(ctx, trx, obEntity.Transaction{
+			TxID:   transaction.TxID,
+			Status: constants.TicketOrderSuccess,
+		}); err != nil {
+			trx.Rollback()
+			return response, err
+		}
+
+		response = ucEntity.PurchaseResponse{
+			Status: constants.TicketOrderSuccess,
+		}
+	}
+
+	// publish email notification to the user
+
 	// call payment gateway api -- belum ada, dibiarkan
 	// gateway request (log ke gateway_requests) -- menyusul bareng call gateway
 

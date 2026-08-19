@@ -8,12 +8,15 @@ type (
 		EventID  int64  `json:"event_id"`
 		Date     string `json:"date"`
 		Quantity int64  `json:"quantity"`
+		Price    int64  `json:"price"`
 	}
 
 	CacheInitOrderResponse struct {
-		Date     string `json:"date"`
+		UserID   int64  `json:"user_id"`
 		EventID  int64  `json:"event_id"`
+		Date     string `json:"date"`
 		Quantity int64  `json:"quantity"`
+		Price    int64  `json:"price"`
 	}
 )
 

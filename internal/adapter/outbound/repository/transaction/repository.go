@@ -4,6 +4,7 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	ICreate
+	IUpdateStatus
 }
 
 type transaction struct {

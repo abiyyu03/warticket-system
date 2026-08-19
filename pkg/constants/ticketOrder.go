@@ -3,7 +3,7 @@ package constants
 const (
 	TicketOrderInit      = "INIT_PAYMENT"
 	TicketOrderPending   = "PENDING_PAYMENT"
-	TicketOrderSuccess   = "PAYMENT_SUCCESSFUL"
+	TicketOrderSuccess   = "SUCCESSFUL"
 	TicketOrderFailed    = "PAYMENT_FAILED"
 	TicketOrderCancelled = "PAYMENT_CANCELLED"
 )
