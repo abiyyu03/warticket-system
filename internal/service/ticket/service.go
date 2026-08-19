@@ -15,6 +15,7 @@ type service struct {
 	outbound.Outbound
 	cache      *pkg.Redis
 	repository *pkg.SQL
+	logger     *pkg.Logger
 }
 
 func New(
@@ -25,5 +26,6 @@ func New(
 		Outbound:   outbound,
 		cache:      pkg.Cache,
 		repository: pkg.DB,
+		logger:     pkg.Log,
 	}
 }

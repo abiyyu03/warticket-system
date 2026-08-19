@@ -7,10 +7,16 @@ import (
 type Package struct {
 	DB    *SQL
 	Cache *Redis
+	Log   *Logger
 }
 
 func NewPackage() (Package, error) {
 	config.InitEnv()
+
+	logger, err := NewLogger()
+	if err != nil {
+		return Package{}, err
+	}
 
 	var (
 		postgresCfg = config.LoadPostgresConfig()
@@ -30,5 +36,6 @@ func NewPackage() (Package, error) {
 	return Package{
 		DB:    sql,
 		Cache: cache,
+		Log:   logger,
 	}, nil
 }
