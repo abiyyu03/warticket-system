@@ -4,6 +4,8 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	ICreate
+	IRedeemTicket
+	IGetOneByCode
 }
 
 type userTicket struct {
