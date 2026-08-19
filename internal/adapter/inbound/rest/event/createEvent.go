@@ -14,6 +14,10 @@ func (h *Handler) CreateEvent(fctx *fiber.Ctx) error {
 		ctx     = context.WithValue(fctx.Context(), "x-user-id", fctx.Get("x-user-id"))
 	)
 
+	if err := fctx.BodyParser(&request); err != nil {
+		return err
+	}
+
 	err := h.Service.Event.CreateEvent(ctx, request.ToUcEntity())
 	if err != nil {
 		return err

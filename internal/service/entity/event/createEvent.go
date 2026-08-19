@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (r CreateEventRequest) ToObEntity(parsedStart time.Time, parsedEnd time.Time) entity.Event {
+func (r CreateEventRequest) ToObEntity(parsedStart, parsedEnd time.Time) entity.Event {
 	return entity.Event{
 		Name:        r.Name,
 		Description: r.Description,

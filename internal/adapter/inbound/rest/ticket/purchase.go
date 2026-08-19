@@ -11,8 +11,12 @@ import (
 func (h *Handler) Purchase(fctx *fiber.Ctx) error {
 	var (
 		request entity.PurchaseRequest
-		ctx     = context.WithValue(fctx.Context(), "x-user-id", fctx.Get("x-user-id"))
+		ctx     = context.WithValue(fctx.UserContext(), "x-user-id", fctx.Get("x-user-id"))
 	)
+
+	if err := fctx.BodyParser(&request); err != nil {
+		return err
+	}
 
 	response, err := h.Service.Ticket.Purchase(ctx, request.ToUcEntity())
 	if err != nil {
