@@ -29,7 +29,7 @@ CREATE TABLE transactions (
     CONSTRAINT ck_transactions_deduction_non_negative  CHECK (amount_deduction IS NULL OR amount_deduction >= 0),
     CONSTRAINT ck_transactions_tax_non_negative        CHECK (tax >= 0),
     CONSTRAINT ck_transactions_admin_fee_non_negative  CHECK (admin_fee >= 0),
-    CONSTRAINT ck_transactions_status CHECK (status IN ('PENDING', 'PAID', 'FAILED', 'EXPIRED', 'REFUNDED'))
+    CONSTRAINT ck_transactions_status CHECK (status IN ('PENDING', 'SUCCESSFUL', 'CANCELLED','REFUNDED'))
 );
 
 -- promo_id belum diberi FK karena tabel promos belum ada. Tambahkan

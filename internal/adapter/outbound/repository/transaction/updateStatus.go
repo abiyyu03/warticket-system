@@ -8,7 +8,11 @@ import (
 )
 
 func (r transaction) UpdateStatus(ctx context.Context, orm *gorm.DB, trx entity.Transaction) error {
-	err := orm.WithContext(ctx).Where("tx_id = ?", trx.TxID).Updates(map[string]interface{}{"status": trx.Status}).Error
+	// Model wajib supaya GORM tahu tabel target saat Updates pakai map.
+	err := orm.WithContext(ctx).
+		Model(&entity.Transaction{}).
+		Where("tx_id = ?", trx.TxID).
+		Updates(map[string]interface{}{"status": trx.Status}).Error
 	if err != nil {
 		return err
 	}
