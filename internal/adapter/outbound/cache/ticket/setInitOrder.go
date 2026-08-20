@@ -14,6 +14,7 @@ func (c ticketCache) SetInitOrder(ctx context.Context, req entity.CacheInitOrder
 		EventID:  req.EventID,
 		Quantity: req.Quantity,
 		UserID:   req.UserID,
+		Price:    req.Price,
 	})
 	if err != nil {
 		return err

@@ -34,12 +34,14 @@ func (r InitOrderRequest) ToObGetCache(userId int64) entity.CacheInitOrderReques
 	}
 }
 
-func (r InitOrderRequest) ToObSetCache(userId int64) entity.CacheInitOrderRequest {
+// ToObSetCache menyusun payload cache. price berasal dari event (server-side),
+// bukan dari request.
+func (r InitOrderRequest) ToObSetCache(userId, price int64) entity.CacheInitOrderRequest {
 	return entity.CacheInitOrderRequest{
 		EventID:  r.EventID,
 		Date:     r.Date,
 		Quantity: r.Quantity,
 		UserID:   userId,
-		Price:    r.Price,
+		Price:    price,
 	}
 }

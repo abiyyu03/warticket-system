@@ -3,8 +3,8 @@ package ticket
 import (
 	"context"
 	"errors"
+	cacheTicket "go-projects/hexagonal-example/internal/adapter/outbound/cache/ticket"
 	"go-projects/hexagonal-example/internal/adapter/outbound/entity"
-	obEntity "go-projects/hexagonal-example/internal/adapter/outbound/entity"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"strconv"
 	"time"
@@ -31,7 +31,8 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 	log.Info("init order requested")
 
 	// check cache availability if already exist
-	initOrder, err := s.Cache.Ticket.GetInitOrder(ctx, entity.CacheInitOrderRequest{UserID: userId})
+	// key reservasi per (user, event); cek reservasi untuk event ini saja.
+	initOrder, err := s.Cache.Ticket.GetInitOrder(ctx, entity.CacheInitOrderRequest{UserID: userId, EventID: req.EventID})
 	if err == nil {
 		log.Info("reservation already exists, returning cached order",
 			zap.String("cached_date", initOrder.Date))
@@ -42,42 +43,39 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		}, nil
 	}
 
-	// validate event
-	_, err = s.Repository.Event.GetOneById(ctx, orm, obEntity.Event{ID: req.EventID})
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Warn("event not found")
-			return response, errors.New("event not found")
-		}
-		log.Error("failed to load event", zap.Error(err))
-		return response, err
-	}
-
-	// use REDIS DECR by quantity
-	for i := 0; i < int(req.Quantity); i++ {
-		err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{EventID: req.EventID})
-		if err != nil {
-			log.Error("failed to decrement ticket quota in redis",
-				zap.Int("at_slot", i), zap.Error(err))
-			return response, err
-		}
-	}
-
+	// parse tanggal & validasi event (sekaligus cek eksistensi + rentang tanggal)
 	parsedEventDate, err := time.Parse("2006-01-02", req.Date)
 	if err != nil {
 		log.Warn("invalid event date format", zap.String("date", req.Date), zap.Error(err))
 		return response, err
 	}
 
-	// check event date
-	_, err = s.Repository.Event.GetOneById(ctx, orm, req.ToObEvent(parsedEventDate))
+	event, err := s.Repository.Event.GetOneById(ctx, orm, req.ToObEvent(parsedEventDate))
 	if err != nil {
-		log.Error("event date validation failed", zap.Error(err))
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn("event not found")
+			return response, errors.New("event not found")
+		}
+		log.Error("event validation failed", zap.Error(err))
 		return response, err
 	}
 
-	// caching initialization data
-	err = s.Cache.Ticket.SetInitOrder(ctx, req.ToObSetCache(userId))
+	// reserve kuota di redis: satu DECRBY sebanyak quantity (atomik).
+	if err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{
+		EventID:  req.EventID,
+		Quantity: req.Quantity,
+	}); err != nil {
+		if errors.Is(err, cacheTicket.ErrQuotaSoldOut) {
+			log.Warn("event sold out, reservation rejected")
+			return response, err
+		}
+		log.Error("failed to decrement ticket quota in redis", zap.Error(err))
+		return response, err
+	}
+
+	// caching initialization data. harga diambil dari event (server-side),
+	// bukan dari request, supaya tidak bisa dimanipulasi client.
+	err = s.Cache.Ticket.SetInitOrder(ctx, req.ToObSetCache(userId, int64(event.Price)))
 	if err != nil {
 		log.Error("failed to cache init order", zap.Error(err))
 		return response, err
