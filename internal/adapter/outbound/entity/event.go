@@ -13,6 +13,7 @@ type Event struct {
 	ImageFile   string    `gorm:"column:image_file" json:"image_file,omitempty"`
 	Price       float64   `gorm:"column:price;not null" json:"price"`
 	Quota       int64     `gorm:"column:quota;not null" json:"quota"`
+	QuotaRemaining int64  `gorm:"column:quota_remaining;not null" json:"quota_remaining"`
 	StartDate   time.Time `gorm:"column:start_date;not null;index" json:"start_date"`
 	EndDate     time.Time `gorm:"column:end_date" json:"end_date"`
 }

@@ -19,13 +19,19 @@ type (
 )
 
 func (r CreateEventRequest) ToObEntity(parsedStart, parsedEnd time.Time) entity.Event {
+	var imageFile string
+	if r.ImageFile != nil {
+		imageFile = r.ImageFile.Filename
+	}
+
 	return entity.Event{
 		Name:        r.Name,
 		Description: r.Description,
-		ImageFile:   r.ImageFile.Filename,
+		ImageFile:   imageFile,
 		Price:       r.Price,
 		Quota:       r.Quota,
-		StartDate:   parsedStart,
-		EndDate:     parsedEnd,
+		QuotaRemaining: r.Quota,
+		StartDate:      parsedStart,
+		EndDate:        parsedEnd,
 	}
 }

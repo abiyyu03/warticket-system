@@ -1,12 +1,19 @@
 package event
 
-import "go-projects/hexagonal-example/pkg"
+import (
+	"errors"
+
+	"go-projects/hexagonal-example/pkg"
+)
+
+var ErrInsufficientQuota = errors.New("insufficient event quota")
 
 type Repository interface {
 	IGetOneById
 	IGetOneByCode
 	ICreate
 	IGetAll
+	IDecrementQuota
 }
 
 type event struct {
