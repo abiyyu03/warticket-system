@@ -21,4 +21,6 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 	event := v1Api.Group("events")
 	event.Get("/", i.Event.GetListEvent)
 	event.Post("/", i.Event.CreateEvent)
+	event.Get("/:id/form", i.Event.GetEventForm)
+	event.Post("/:id/register", i.Event.SubmitRegistration)
 }

@@ -4,6 +4,7 @@ import (
 	"go-projects/hexagonal-example/internal/adapter/outbound/repository/event"
 	"go-projects/hexagonal-example/internal/adapter/outbound/repository/transaction"
 	"go-projects/hexagonal-example/internal/adapter/outbound/repository/user"
+	"go-projects/hexagonal-example/internal/adapter/outbound/repository/userRegistration"
 	"go-projects/hexagonal-example/internal/adapter/outbound/repository/userTicket"
 
 	"go.uber.org/dig"
@@ -12,10 +13,11 @@ import (
 type Repository struct {
 	dig.In
 
-	User        user.Repository
-	UserTicket  userTicket.Repository
-	Event       event.Repository
-	Transaction transaction.Repository
+	User             user.Repository
+	UserTicket       userTicket.Repository
+	Event            event.Repository
+	Transaction      transaction.Repository
+	UserRegistration userRegistration.Repository
 }
 
 func Register(container *dig.Container) error {
@@ -29,6 +31,9 @@ func Register(container *dig.Container) error {
 		return err
 	}
 	if err := container.Provide(transaction.New); err != nil {
+		return err
+	}
+	if err := container.Provide(userRegistration.New); err != nil {
 		return err
 	}
 
