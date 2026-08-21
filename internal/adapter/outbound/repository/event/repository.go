@@ -14,6 +14,8 @@ type Repository interface {
 	ICreate
 	IGetAll
 	IDecrementQuota
+	ICreateFormFields
+	IGetFormFields
 }
 
 type event struct {

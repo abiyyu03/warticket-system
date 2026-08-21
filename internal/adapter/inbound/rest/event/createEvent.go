@@ -18,8 +18,18 @@ func (h *Handler) CreateEvent(fctx *fiber.Ctx) error {
 		return err
 	}
 
-	err := h.Service.Event.CreateEvent(ctx, request.ToUcEntity())
+	// definisi formulir kustom (opsional) dikirim sebagai JSON di multipart.
+	formFields, err := request.ParseFormFields()
 	if err != nil {
+		return fctx.Status(fiber.StatusBadRequest).JSON(
+			baseEntity.BaseResponse{}.ToResponse("form_fields tidak valid", fiber.StatusBadRequest, nil, nil),
+		)
+	}
+
+	ucRequest := request.ToUcEntity()
+	ucRequest.FormFields = formFields
+
+	if err := h.Service.Event.CreateEvent(ctx, ucRequest); err != nil {
 		return err
 	}
 
