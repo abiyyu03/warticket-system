@@ -60,6 +60,26 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		return response, err
 	}
 
+	// gate formulir pendaftaran (§5.3): kalau event punya form kustom dan user
+	// belum mendaftar, pemesanan diblokir sampai formulir diisi. Cek registrasi
+	// dulu; hanya kalau belum terdaftar baru cek apakah event memang butuh form.
+	registered, regErr := s.Repository.UserRegistration.ExistsByUserEvent(ctx, orm, userId, req.EventID)
+	if regErr != nil {
+		log.Error("failed to check registration", zap.Error(regErr))
+		return response, regErr
+	}
+	if !registered {
+		fields, ferr := s.Repository.Event.GetFormFieldsByEvent(ctx, orm, req.EventID)
+		if ferr != nil {
+			log.Error("failed to check event form", zap.Error(ferr))
+			return response, ferr
+		}
+		if len(fields) > 0 {
+			log.Warn("registration required before init order")
+			return response, errors.New("isi formulir pendaftaran terlebih dahulu")
+		}
+	}
+
 	// reserve kuota di redis: satu DECRBY sebanyak quantity (atomik).
 	if err = s.Cache.Ticket.DecrTicketQuota(ctx, entity.DecrTicketQuotaRequest{
 		EventID:  req.EventID,
