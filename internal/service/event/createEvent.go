@@ -20,11 +20,38 @@ func (s *service) CreateEvent(ctx context.Context, request ucEntity.CreateEventR
 		return err
 	}
 
-	event := request.ToObEntity(start, end)
-	if err := s.Repository.Event.Create(ctx, orm, &event); err != nil {
+	// validasi definisi formulir sebelum menyentuh DB.
+	if err := request.ValidateFormFields(); err != nil {
 		return err
 	}
 
+	// event + form field-nya dibuat atomik dalam satu transaksi.
+	trx := orm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			trx.Rollback()
+		}
+	}()
+
+	event := request.ToObEntity(start, end)
+	if err := s.Repository.Event.Create(ctx, trx, &event); err != nil {
+		trx.Rollback()
+		return err
+	}
+
+	// form field opsional; id event baru dipakai sebagai foreign key.
+	if fields := request.ToObFormFields(event.ID); len(fields) > 0 {
+		if err := s.Repository.Event.CreateFormFields(ctx, trx, fields); err != nil {
+			trx.Rollback()
+			return err
+		}
+	}
+
+	if err := trx.Commit().Error; err != nil {
+		return err
+	}
+
+	// counter kuota di redis di-set setelah event tersimpan permanen.
 	err = s.Cache.Ticket.SetTicketQuota(ctx, obEntity.SetTicketQuotaRequest{
 		EventID: event.ID,
 		Quota:   request.Quota,

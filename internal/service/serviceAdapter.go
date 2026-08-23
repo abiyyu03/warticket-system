@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go-projects/hexagonal-example/internal/service/author"
 	"go-projects/hexagonal-example/internal/service/event"
 	"go-projects/hexagonal-example/internal/service/ticket"
 	"go-projects/hexagonal-example/internal/service/user"
@@ -14,6 +15,7 @@ type Service struct {
 	User   user.UserService
 	Event  event.EventService
 	Ticket ticket.TicketService
+	Author author.AuthorService
 }
 
 func Register(container *dig.Container) error {
@@ -26,6 +28,10 @@ func Register(container *dig.Container) error {
 	}
 
 	if err := container.Provide(event.New); err != nil {
+		return err
+	}
+
+	if err := container.Provide(author.New); err != nil {
 		return err
 	}
 

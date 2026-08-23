@@ -94,9 +94,10 @@ func TestE2E_Scenario1_FreeEventPurchase(t *testing.T) {
 		"start_date":  start.Format(time.RFC3339),
 		"end_date":    end.Format(time.RFC3339),
 	})
-	req := httptest.NewRequest(http.MethodPost, "/v1/api/events", body)
+	req := httptest.NewRequest(http.MethodPost, "/v1/api/authors/events", body)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("x-user-id", strconv.FormatInt(e2eUserID, 10))
+	req.Header.Set("Authorization", authorBearer(t, app))
 
 	resp, err := app.Test(req, -1)
 	if err != nil {
@@ -251,9 +252,10 @@ func TestE2E_Scenario2_PaidEventPending(t *testing.T) {
 		"start_date":  start.Format(time.RFC3339),
 		"end_date":    end.Format(time.RFC3339),
 	})
-	req := httptest.NewRequest(http.MethodPost, "/v1/api/events", body)
+	req := httptest.NewRequest(http.MethodPost, "/v1/api/authors/events", body)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("x-user-id", strconv.FormatInt(e2eUserID, 10))
+	req.Header.Set("Authorization", authorBearer(t, app))
 	resp, err := app.Test(req, -1)
 	if err != nil {
 		t.Fatalf("create event request: %v", err)

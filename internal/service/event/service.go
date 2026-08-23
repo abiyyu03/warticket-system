@@ -8,6 +8,9 @@ import (
 type EventService interface {
 	ICreateEvent
 	IGetListEvent
+	IGetEventForm
+	IGetOneEvent
+	ISubmitRegistration
 }
 
 type service struct {
