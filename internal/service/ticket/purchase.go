@@ -3,7 +3,6 @@ package ticket
 import (
 	"context"
 	"strconv"
-	"time"
 
 	obEntity "go-projects/hexagonal-example/internal/adapter/outbound/entity"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
@@ -19,24 +18,15 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 		userId, _ = strconv.ParseInt(userIdCtx, 10, 64)
 	)
 
-	// ambil payload init order dari cache (di-set saat InitOrder)
-	// event id diambil dari request; reservasi di-cache per (user, event).
-	cachedInitOrder, err := s.Cache.Ticket.GetInitOrder(ctx, obEntity.CacheInitOrderRequest{UserID: userId, EventID: req.EventID})
+	// ambil payload init order dari cache; reservasi di-key oleh tx_id yang
+	// sudah diterbitkan saat InitOrder.
+	cachedInitOrder, err := s.Cache.Ticket.GetInitOrder(ctx, obEntity.CacheInitOrderRequest{TxID: req.TxID})
 	if err != nil {
 		return response, err
 	}
 
-	parsedTime, err := time.Parse("2006-01-02", cachedInitOrder.Date)
-	if err != nil {
-		return response, err
-	}
-
-	// validasi event sekaligus ambil harga. GetOneById juga mengecek tanggal
-	// pilihan user masih dalam rentang event.
-	event, err := s.Repository.Event.GetOneById(ctx, orm, obEntity.Event{
-		ID:        cachedInitOrder.EventID,
-		StartDate: parsedTime,
-	})
+	// ambil event (tanpa validasi tanggal; date sudah ditentukan server-side).
+	event, err := s.Repository.Event.GetByID(ctx, orm, cachedInitOrder.EventID)
 	if err != nil {
 		return response, err
 	}
@@ -63,7 +53,7 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 	// tax/admin_fee/amount_deduction/promo dibiarkan nol/null; diisi setelah
 	// call payment gateway tersedia.
 	transaction := obEntity.Transaction{
-		TxID:     uuid.NewString(),
+		TxID:     cachedInitOrder.TxID,
 		UserID:   userId,
 		EventID:  event.ID,
 		AuthorID: 1,
@@ -116,8 +106,8 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 
 	// publish email notification to the user
 
-	// Order sudah terbentuk; bersihkan cache init order.
-	s.Cache.Ticket.ClearInitOrder(ctx, obEntity.CacheInitOrderRequest{UserID: userId, EventID: req.EventID})
+	// Order sudah terbentuk; bersihkan cache init order (key tx_id).
+	s.Cache.Ticket.ClearInitOrder(ctx, obEntity.CacheInitOrderRequest{TxID: cachedInitOrder.TxID})
 
 	response = ucEntity.PurchaseResponse{Status: status}
 	return response, nil

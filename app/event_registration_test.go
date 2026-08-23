@@ -100,7 +100,6 @@ func TestE2E_RegistrationGate(t *testing.T) {
 	}
 
 	initBody := map[string]any{
-		"date":     start.Format("2006-01-02"),
 		"event_id": eventID,
 		"quantity": 1,
 	}

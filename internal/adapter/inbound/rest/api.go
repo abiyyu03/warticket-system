@@ -48,7 +48,6 @@ func (i Inbound) ApiRoutes(app *fiber.App) {
 	authorEvent.Get("/:id", i.Event.GetOneEvent)
 	authorEvent.Post("/", i.Event.CreateEvent)
 	authorEvent.Get("/:id/form", i.Event.GetEventForm)
-	// pengelolaan tiket: daftar tiket per event + export ke Excel.
 	authorEvent.Get("/:id/tickets", i.Ticket.GetEventTickets)
 	authorEvent.Get("/:id/tickets/export", i.Ticket.ExportEventTickets)
 }

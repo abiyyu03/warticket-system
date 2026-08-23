@@ -1,18 +1,15 @@
 package ticket
 
-import (
-	"go-projects/hexagonal-example/internal/adapter/outbound/entity"
-	"time"
-)
+import "go-projects/hexagonal-example/internal/adapter/outbound/entity"
 
 type (
 	InitOrderRequest struct {
-		Date     string `json:"date"`
-		EventID  int64  `json:"event_id"`
-		Quantity int64  `json:"quantity"`
+		EventID  int64 `json:"event_id"`
+		Quantity int64 `json:"quantity"`
 	}
 
 	InitOrderResponse struct {
+		TxID     string `json:"tx_id"`
 		Date     string `json:"date"`
 		EventID  int64  `json:"event_id"`
 		Quantity int64  `json:"quantity"`
@@ -20,25 +17,13 @@ type (
 	}
 )
 
-func (r InitOrderRequest) ToObEvent(parsedDate time.Time) entity.Event {
-	return entity.Event{
-		ID:        r.EventID,
-		StartDate: parsedDate,
-	}
-}
-
-func (r InitOrderRequest) ToObGetCache(userId int64) entity.CacheInitOrderRequest {
+// ToObSetCache menyusun payload cache reservasi. tx_id & date diisi server-side
+// (date = tanggal event), harga dari event supaya tidak bisa dimanipulasi client.
+func (r InitOrderRequest) ToObSetCache(txID, date string, userId, price int64) entity.CacheInitOrderRequest {
 	return entity.CacheInitOrderRequest{
-		UserID: userId,
-	}
-}
-
-// ToObSetCache menyusun payload cache. price berasal dari event (server-side),
-// bukan dari request.
-func (r InitOrderRequest) ToObSetCache(userId, price int64) entity.CacheInitOrderRequest {
-	return entity.CacheInitOrderRequest{
+		TxID:     txID,
 		EventID:  r.EventID,
-		Date:     r.Date,
+		Date:     date,
 		Quantity: r.Quantity,
 		UserID:   userId,
 		Price:    price,

@@ -10,6 +10,7 @@ import (
 
 func (c ticketCache) SetInitOrder(ctx context.Context, req entity.CacheInitOrderRequest) error {
 	init, err := json.Marshal(&entity.CacheInitOrderRequest{
+		TxID:     req.TxID,
 		Date:     req.Date,
 		EventID:  req.EventID,
 		Quantity: req.Quantity,
@@ -20,7 +21,7 @@ func (c ticketCache) SetInitOrder(ctx context.Context, req entity.CacheInitOrder
 		return err
 	}
 
-	redisKey := fmt.Sprintf(key, req.UserID, req.EventID)
+	redisKey := fmt.Sprintf(key, req.TxID)
 
 	result := c.Package.Cache.Client.Set(ctx, redisKey, init, time.Minute*10)
 

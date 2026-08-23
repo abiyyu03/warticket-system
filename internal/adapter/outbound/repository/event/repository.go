@@ -10,6 +10,7 @@ var ErrInsufficientQuota = errors.New("insufficient event quota")
 
 type Repository interface {
 	IGetOneById
+	IGetByID
 	IGetOneByCode
 	ICreate
 	IGetAll

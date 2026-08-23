@@ -7,8 +7,8 @@ import (
 	"go-projects/hexagonal-example/internal/adapter/outbound/entity"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 	"strconv"
-	"time"
 
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -21,48 +21,32 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		userId, _ = strconv.ParseInt(userIdCtx, 10, 64)
 	)
 
-	// logger tercakup untuk seluruh flow ini; field dasar ikut di setiap baris log.
+	// tx_id diterbitkan di awal init order; dipakai sebagai kunci reservasi
+	// (cache) sekaligus id transaksi saat purchase nanti.
+	txID := uuid.NewString()
+
 	log := s.logger.With(
 		zap.String("flow", "init_order"),
+		zap.String("tx_id", txID),
 		zap.Int64("user_id", userId),
 		zap.Int64("event_id", req.EventID),
 		zap.Int64("quantity", req.Quantity),
 	)
 	log.Info("init order requested")
 
-	// check cache availability if already exist
-	// key reservasi per (user, event); cek reservasi untuk event ini saja.
-	initOrder, err := s.Cache.Ticket.GetInitOrder(ctx, entity.CacheInitOrderRequest{UserID: userId, EventID: req.EventID})
-	if err == nil {
-		log.Info("reservation already exists, returning cached order",
-			zap.String("cached_date", initOrder.Date))
-		return ucEntity.InitOrderResponse{
-			Date:     initOrder.Date,
-			EventID:  initOrder.EventID,
-			Quantity: initOrder.Quantity,
-		}, nil
-	}
-
-	// parse tanggal & validasi event (sekaligus cek eksistensi + rentang tanggal)
-	parsedEventDate, err := time.Parse("2006-01-02", req.Date)
-	if err != nil {
-		log.Warn("invalid event date format", zap.String("date", req.Date), zap.Error(err))
-		return response, err
-	}
-
-	event, err := s.Repository.Event.GetOneById(ctx, orm, req.ToObEvent(parsedEventDate))
+	// ambil event (tanpa validasi tanggal; date diisi server-side).
+	event, err := s.Repository.Event.GetByID(ctx, orm, req.EventID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Warn("event not found")
 			return response, errors.New("event not found")
 		}
-		log.Error("event validation failed", zap.Error(err))
+		log.Error("failed to fetch event", zap.Error(err))
 		return response, err
 	}
 
 	// gate formulir pendaftaran (§5.3): kalau event punya form kustom dan user
-	// belum mendaftar, pemesanan diblokir sampai formulir diisi. Cek registrasi
-	// dulu; hanya kalau belum terdaftar baru cek apakah event memang butuh form.
+	// belum mendaftar, pemesanan diblokir sampai formulir diisi.
 	registered, regErr := s.Repository.UserRegistration.ExistsByUserEvent(ctx, orm, userId, req.EventID)
 	if regErr != nil {
 		log.Error("failed to check registration", zap.Error(regErr))
@@ -93,17 +77,19 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		return response, err
 	}
 
-	// caching initialization data. harga diambil dari event (server-side),
-	// bukan dari request, supaya tidak bisa dimanipulasi client.
-	err = s.Cache.Ticket.SetInitOrder(ctx, req.ToObSetCache(userId, int64(event.Price)))
-	if err != nil {
+	// date diisi dari tanggal event (server-side), bukan dari client.
+	date := event.StartDate.Format("2006-01-02")
+
+	// cache reservasi di-key oleh tx_id.
+	if err = s.Cache.Ticket.SetInitOrder(ctx, req.ToObSetCache(txID, date, userId, int64(event.Price))); err != nil {
 		log.Error("failed to cache init order", zap.Error(err))
 		return response, err
 	}
 
 	log.Info("init order initiated successfully")
 	return ucEntity.InitOrderResponse{
-		Date:     req.Date,
+		TxID:     txID,
+		Date:     date,
 		EventID:  req.EventID,
 		Quantity: req.Quantity,
 		Price:    int64(event.Price),

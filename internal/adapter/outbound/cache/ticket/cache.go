@@ -3,8 +3,8 @@ package ticket
 import "go-projects/hexagonal-example/pkg"
 
 var (
-	key          = "tickets:order:%d:event:%d"
-	keyInit      = "tickets:order:init:%d"
+	// reservasi init order di-key oleh tx_id (diterbitkan saat init order).
+	key          = "tickets:order:%s"
 	keyDecrQuota = "tickets:event:%d"
 )
 

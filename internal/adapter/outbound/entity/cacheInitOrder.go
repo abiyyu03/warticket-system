@@ -4,6 +4,7 @@ import "encoding/json"
 
 type (
 	CacheInitOrderRequest struct {
+		TxID     string `json:"tx_id"`
 		UserID   int64  `json:"user_id"`
 		EventID  int64  `json:"event_id"`
 		Date     string `json:"date"`
@@ -12,6 +13,7 @@ type (
 	}
 
 	CacheInitOrderResponse struct {
+		TxID     string `json:"tx_id"`
 		UserID   int64  `json:"user_id"`
 		EventID  int64  `json:"event_id"`
 		Date     string `json:"date"`

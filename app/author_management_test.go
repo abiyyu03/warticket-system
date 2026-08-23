@@ -84,10 +84,11 @@ func TestE2E_AuthorManagement(t *testing.T) {
 		t.Fatalf("query event id: %v", err)
 	}
 
-	doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
-		"date": start.Format("2006-01-02"), "event_id": eventID, "quantity": 1,
+	initResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
+		"event_id": eventID, "quantity": 1,
 	})
-	if r := doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{"event_id": eventID}); r.StatusCode != fiber.StatusOK {
+	txID := txIDOf(t, initResp)
+	if r := doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{"tx_id": txID}); r.StatusCode != fiber.StatusOK {
 		t.Fatalf("purchase: status = %d (%s)", r.StatusCode, readBody(r))
 	}
 

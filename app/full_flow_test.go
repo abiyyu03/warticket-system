@@ -126,7 +126,6 @@ func TestE2E_FullFlow_FormToPurchase(t *testing.T) {
 	}
 
 	initBody := map[string]any{
-		"date":     start.Format("2006-01-02"),
 		"event_id": eventID,
 		"quantity": 1,
 	}
@@ -173,14 +172,16 @@ func TestE2E_FullFlow_FormToPurchase(t *testing.T) {
 		}
 	}
 
-	// ---------- 4. INIT-ORDER SETELAH DAFTAR -> LOLOS ----------
-	if r := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", initBody); r.StatusCode != fiber.StatusOK {
-		t.Fatalf("init-order setelah registrasi: status = %d, want 200 (%s)", r.StatusCode, readBody(r))
+	// ---------- 4. INIT-ORDER SETELAH DAFTAR -> LOLOS (tx_id terbit) ----------
+	initResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", initBody)
+	if initResp.StatusCode != fiber.StatusOK {
+		t.Fatalf("init-order setelah registrasi: status = %d, want 200 (%s)", initResp.StatusCode, readBody(initResp))
 	}
+	txID := txIDOf(t, initResp)
 
-	// ---------- 5. PURCHASE (gratis -> SUCCESSFUL) ----------
+	// ---------- 5. PURCHASE (pakai tx_id -> SUCCESSFUL) ----------
 	purchaseResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{
-		"event_id": eventID,
+		"tx_id": txID,
 	})
 	if purchaseResp.StatusCode != fiber.StatusOK {
 		t.Fatalf("purchase: status = %d, want 200 (%s)", purchaseResp.StatusCode, readBody(purchaseResp))

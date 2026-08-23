@@ -7,7 +7,7 @@ import (
 )
 
 func (c ticketCache) ClearInitOrder(ctx context.Context, req entity.CacheInitOrderRequest) error {
-	redisKey := fmt.Sprintf(key, req.UserID, req.EventID)
+	redisKey := fmt.Sprintf(key, req.TxID)
 	c.Package.Cache.Client.Del(ctx, redisKey)
 
 	return nil

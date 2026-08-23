@@ -81,10 +81,11 @@ func TestE2E_ExportEventTickets(t *testing.T) {
 	if err := p.DB.Raw(`SELECT id FROM events WHERE name = ?`, eventName).Scan(&eventID).Error; err != nil {
 		t.Fatalf("query event id: %v", err)
 	}
-	doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
-		"date": start.Format("2006-01-02"), "event_id": eventID, "quantity": 1,
+	initResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
+		"event_id": eventID, "quantity": 1,
 	})
-	doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{"event_id": eventID})
+	txID := txIDOf(t, initResp)
+	doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{"tx_id": txID})
 
 	var ticketCode string
 	p.DB.Raw(`SELECT code FROM user_tickets WHERE event_id = ? LIMIT 1`, eventID).Scan(&ticketCode)

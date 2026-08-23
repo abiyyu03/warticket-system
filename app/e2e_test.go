@@ -124,15 +124,15 @@ func TestE2E_Scenario1_FreeEventPurchase(t *testing.T) {
 		t.Fatalf("redis quota awal = %d, want %d", gotQuota, quota)
 	}
 
-	// ---------- 2. INIT ORDER ----------
+	// ---------- 2. INIT ORDER (tx_id diterbitkan di sini) ----------
 	initResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
-		"date":     start.Format("2006-01-02"),
 		"event_id": eventID,
 		"quantity": 1,
 	})
 	if initResp.StatusCode != fiber.StatusOK {
 		t.Fatalf("init order: status = %d, want 200 (%s)", initResp.StatusCode, readBody(initResp))
 	}
+	txID := txIDOf(t, initResp)
 
 	// kuota redis berkurang 1 (reservasi)
 	gotQuota, _ = p.Cache.Client.Get(ctx, fmt.Sprintf("tickets:event:%d", eventID)).Int()
@@ -140,9 +140,9 @@ func TestE2E_Scenario1_FreeEventPurchase(t *testing.T) {
 		t.Fatalf("redis quota setelah init = %d, want %d", gotQuota, quota-1)
 	}
 
-	// ---------- 3. PURCHASE (gratis -> auto SUCCESSFUL) ----------
+	// ---------- 3. PURCHASE (pakai tx_id -> auto SUCCESSFUL) ----------
 	purchaseResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{
-		"event_id": eventID,
+		"tx_id": txID,
 	})
 	if purchaseResp.StatusCode != fiber.StatusOK {
 		t.Fatalf("purchase: status = %d, want 200 (%s)", purchaseResp.StatusCode, readBody(purchaseResp))
@@ -271,19 +271,19 @@ func TestE2E_Scenario2_PaidEventPending(t *testing.T) {
 		t.Fatal("event tidak tersimpan di DB")
 	}
 
-	// 2. init order
+	// 2. init order (tx_id diterbitkan di sini)
 	initResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/init-order", map[string]any{
-		"date":     start.Format("2006-01-02"),
 		"event_id": eventID,
 		"quantity": 1,
 	})
 	if initResp.StatusCode != fiber.StatusOK {
 		t.Fatalf("init order: status = %d, want 200 (%s)", initResp.StatusCode, readBody(initResp))
 	}
+	txID := txIDOf(t, initResp)
 
-	// 3. purchase -> harus PENDING (berbayar, belum bayar)
+	// 3. purchase (pakai tx_id) -> harus PENDING (berbayar, belum bayar)
 	purchaseResp := doJSON(t, app, http.MethodPost, "/v1/api/tickets/claim", map[string]any{
-		"event_id": eventID,
+		"tx_id": txID,
 	})
 	if purchaseResp.StatusCode != fiber.StatusOK {
 		t.Fatalf("purchase: status = %d, want 200 (%s)", purchaseResp.StatusCode, readBody(purchaseResp))
@@ -371,4 +371,21 @@ func readBody(resp *http.Response) string {
 	var buf bytes.Buffer
 	_, _ = buf.ReadFrom(resp.Body)
 	return buf.String()
+}
+
+// txIDOf mengekstrak tx_id dari response init-order (diterbitkan server-side).
+func txIDOf(t *testing.T, resp *http.Response) string {
+	t.Helper()
+	var b struct {
+		Data struct {
+			TxID string `json:"tx_id"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&b); err != nil {
+		t.Fatalf("decode tx_id init-order: %v", err)
+	}
+	if b.Data.TxID == "" {
+		t.Fatal("tx_id kosong dari init-order")
+	}
+	return b.Data.TxID
 }

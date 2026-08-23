@@ -8,8 +8,8 @@ import (
 )
 
 func (c ticketCache) GetInitOrder(ctx context.Context, req entity.CacheInitOrderRequest) (entity.CacheInitOrderResponse, error) {
-	// key harus cocok dengan SetInitOrder: UserID + EventID.
-	redisKey := fmt.Sprintf(key, req.UserID, req.EventID)
+	// key harus cocok dengan SetInitOrder: tx_id.
+	redisKey := fmt.Sprintf(key, req.TxID)
 	result := c.Package.Cache.Client.Get(ctx, redisKey)
 
 	var initUserOrder entity.CacheInitOrderResponse

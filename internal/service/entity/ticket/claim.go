@@ -2,7 +2,7 @@ package ticket
 
 type (
 	PurchaseRequest struct {
-		EventID int64 `json:"event_id"`
+		TxID string `json:"tx_id"`
 	}
 
 	PurchaseResponse struct {
