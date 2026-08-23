@@ -73,9 +73,10 @@ func TestE2E_RegistrationGate(t *testing.T) {
 		"end_date":    end.Format(time.RFC3339),
 		"form_fields": formFields,
 	})
-	req := httptest.NewRequest(http.MethodPost, "/v1/api/events", body)
+	req := httptest.NewRequest(http.MethodPost, "/v1/api/authors/events", body)
 	req.Header.Set("Content-Type", ctype)
 	req.Header.Set("x-user-id", strconv.FormatInt(e2eUserID, 10))
+	req.Header.Set("Authorization", authorBearer(t, app))
 	resp, err := app.Test(req, -1)
 	if err != nil {
 		t.Fatalf("create event request: %v", err)
@@ -110,8 +111,20 @@ func TestE2E_RegistrationGate(t *testing.T) {
 		t.Fatalf("init-order tanpa registrasi seharusnya ditolak, malah 200")
 	}
 
+	// ---------- 1b. registrasi tanpa email -> 400 (email wajib) ----------
+	rNoEmail := doJSON(t, app, http.MethodPost, registerURL(eventID), map[string]any{
+		"answers": []map[string]any{
+			{"field_id": textFieldID, "value": []string{"Budi"}},
+			{"field_id": selectFieldID, "value": []string{"M"}},
+		},
+	})
+	if rNoEmail.StatusCode != fiber.StatusBadRequest {
+		t.Fatalf("registrasi tanpa email: status = %d, want 400 (%s)", rNoEmail.StatusCode, readBody(rNoEmail))
+	}
+
 	// ---------- 2. registrasi wajib: field select kosong -> 400 ----------
 	rMissing := doJSON(t, app, http.MethodPost, registerURL(eventID), map[string]any{
+		"email": "budi@mail.com",
 		"answers": []map[string]any{
 			{"field_id": textFieldID, "value": []string{"Budi"}},
 		},
@@ -122,6 +135,7 @@ func TestE2E_RegistrationGate(t *testing.T) {
 
 	// ---------- 3. registrasi opsi select tidak valid -> 400 ----------
 	rBadOpt := doJSON(t, app, http.MethodPost, registerURL(eventID), map[string]any{
+		"email": "budi@mail.com",
 		"answers": []map[string]any{
 			{"field_id": textFieldID, "value": []string{"Budi"}},
 			{"field_id": selectFieldID, "value": []string{"XXL"}},
@@ -133,6 +147,7 @@ func TestE2E_RegistrationGate(t *testing.T) {
 
 	// ---------- 4. registrasi valid -> 200 ----------
 	rOK := doJSON(t, app, http.MethodPost, registerURL(eventID), map[string]any{
+		"email": "budi@mail.com",
 		"answers": []map[string]any{
 			{"field_id": textFieldID, "value": []string{"Budi"}},
 			{"field_id": selectFieldID, "value": []string{"M"}},
@@ -151,6 +166,7 @@ func TestE2E_RegistrationGate(t *testing.T) {
 
 	// ---------- 5. registrasi ulang -> 400 (sudah terdaftar) ----------
 	rDup := doJSON(t, app, http.MethodPost, registerURL(eventID), map[string]any{
+		"email": "budi@mail.com",
 		"answers": []map[string]any{
 			{"field_id": textFieldID, "value": []string{"Budi"}},
 			{"field_id": selectFieldID, "value": []string{"M"}},
