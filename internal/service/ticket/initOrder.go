@@ -106,7 +106,7 @@ func (s service) InitOrder(ctx context.Context, req ucEntity.InitOrderRequest) (
 		Date:     req.Date,
 		EventID:  req.EventID,
 		Quantity: req.Quantity,
-		Price:    req.Price,
+		Price:    int64(event.Price),
 	}, nil
 }
 

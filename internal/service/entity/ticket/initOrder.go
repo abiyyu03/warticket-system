@@ -10,7 +10,6 @@ type (
 		Date     string `json:"date"`
 		EventID  int64  `json:"event_id"`
 		Quantity int64  `json:"quantity"`
-		Price    int64  `json:"price"`
 	}
 
 	InitOrderResponse struct {
