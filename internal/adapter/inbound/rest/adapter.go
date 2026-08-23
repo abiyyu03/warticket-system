@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"go-projects/hexagonal-example/internal/adapter/inbound/rest/author"
 	"go-projects/hexagonal-example/internal/adapter/inbound/rest/ticket"
 	"go-projects/hexagonal-example/internal/adapter/inbound/rest/user"
 
@@ -15,4 +16,5 @@ type Inbound struct {
 	User   user.Handler
 	Ticket ticket.Handler
 	Event  event.Handler
+	Author author.Handler
 }
