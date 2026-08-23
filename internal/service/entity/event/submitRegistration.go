@@ -11,6 +11,7 @@ type (
 	SubmitRegistrationRequest struct {
 		UserID  int64
 		EventID int64
+		Email   string
 		Answers []AnswerInput
 	}
 
@@ -40,11 +41,25 @@ func inOptions(value string, options []string) bool {
 	return false
 }
 
+// validEmail: cek minimal ada "@" dengan bagian lokal & domain tidak kosong.
+func validEmail(email string) bool {
+	at := strings.Index(email, "@")
+	return at > 0 && at < len(email)-1
+}
+
 // Validate mencocokkan jawaban terhadap definisi field:
+// - email wajib & berformat masuk akal,
 // - field wajib harus terjawab,
 // - jawaban select/checkbox harus termasuk opsi yang tersedia,
 // - jawaban untuk field yang tidak dikenal ditolak.
 func (r SubmitRegistrationRequest) Validate(fields []entity.EventFormField) error {
+	if strings.TrimSpace(r.Email) == "" {
+		return fmt.Errorf("email wajib diisi")
+	}
+	if !validEmail(r.Email) {
+		return fmt.Errorf("format email tidak valid")
+	}
+
 	byID := make(map[int64]entity.EventFormField, len(fields))
 	for _, f := range fields {
 		byID[f.ID] = f
@@ -106,6 +121,7 @@ func (r SubmitRegistrationRequest) ToObEntity() entity.UserRegistration {
 	return entity.UserRegistration{
 		UserID:  r.UserID,
 		EventID: r.EventID,
+		Email:   strings.TrimSpace(r.Email),
 		Answers: answers,
 	}
 }

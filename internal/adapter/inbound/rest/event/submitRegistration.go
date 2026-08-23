@@ -25,8 +25,6 @@ func (h *Handler) SubmitRegistration(fctx *fiber.Ctx) error {
 	}
 
 	if err := h.Service.Event.SubmitRegistration(ctx, request.ToUcEntity(eventID)); err != nil {
-		// mayoritas error di sini bersifat validasi/bisnis (opsi salah, wajib
-		// diisi, sudah terdaftar) -> kembalikan 400 dengan pesan jelas.
 		return fctx.Status(fiber.StatusBadRequest).JSON(
 			baseEntity.BaseResponse{}.ToResponse(err.Error(), fiber.StatusBadRequest, nil, nil),
 		)

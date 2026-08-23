@@ -98,6 +98,10 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 			}
 		}
 
+		// TODO(email): distribusikan tiket ke email pendaftaran (belum ada login).
+		// Email tersimpan wajib di user_registrations; ambil via (user, event) lalu
+		// kirim lewat mailer. Pengiriman ditunda — mekanisme email menyusul.
+
 	} else {
 		// call payment gateway api (event berbayar) -- belum ada, dibiarkan
 		// gateway request (log ke gateway_requests) -- menyusul bareng call gateway

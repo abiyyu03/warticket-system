@@ -4,6 +4,7 @@ import ucEntity "go-projects/hexagonal-example/internal/service/entity/event"
 
 type (
 	SubmitRegistrationRequest struct {
+		Email   string          `json:"email"`
 		Answers []AnswerPayload `json:"answers"`
 	}
 
@@ -24,6 +25,7 @@ func (r SubmitRegistrationRequest) ToUcEntity(eventID int64) ucEntity.SubmitRegi
 	}
 	return ucEntity.SubmitRegistrationRequest{
 		EventID: eventID,
+		Email:   r.Email,
 		Answers: answers,
 	}
 }

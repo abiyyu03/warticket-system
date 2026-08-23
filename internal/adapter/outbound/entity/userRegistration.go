@@ -40,6 +40,7 @@ type UserRegistration struct {
 	ID      int64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	UserID  int64     `gorm:"column:user_id;not null;index" json:"user_id"`
 	EventID int64     `gorm:"column:event_id;not null;index" json:"event_id"`
+	Email   string    `gorm:"column:email;not null;index" json:"email"`
 	Answers AnswerMap `gorm:"column:answers;type:jsonb" json:"answers"`
 }
 
