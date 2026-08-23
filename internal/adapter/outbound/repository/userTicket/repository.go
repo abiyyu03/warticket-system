@@ -6,6 +6,7 @@ type Repository interface {
 	ICreate
 	IRedeemTicket
 	IGetOneByCode
+	IListByEventWithEmail
 }
 
 type userTicket struct {

@@ -9,6 +9,7 @@ type TicketService interface {
 	IPurchase
 	IRedeem
 	IInitOrder
+	IListEventTickets
 }
 
 type service struct {
