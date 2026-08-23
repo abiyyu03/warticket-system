@@ -1,6 +1,6 @@
 MIGRATE_DIR := migration/sql
 
-.PHONY: migrate-up migrate-down migrate-step-up migrate-step-down migrate-version migrate-force migrate-create migrate-reset run build
+.PHONY: migrate-up migrate-down migrate-step-up migrate-step-down migrate-version migrate-force migrate-create migrate-reset seed run build
 
 ## migrate-up: jalankan seluruh migration yang belum dipakai
 migrate-up:
@@ -42,6 +42,10 @@ endif
 	echo "dibuat:"; \
 	echo "  $(MIGRATE_DIR)/$${next}_$(name).up.sql"; \
 	echo "  $(MIGRATE_DIR)/$${next}_$(name).down.sql"
+
+## seed: isi data awal (author, buyer, event contoh + kuota redis)
+seed:
+	go run ./cmd/seed
 
 ## run: jalankan aplikasi
 run:
