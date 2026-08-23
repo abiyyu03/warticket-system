@@ -1,0 +1,381 @@
+{
+  "info": {
+    "name": "WarTicket System API",
+    "description": "Koleksi endpoint WarTicket System (Eventku) sesuai routes di internal/adapter/inbound/rest/api.go.\n\nAlur cepat:\n1. Authors - Auth > Register author, lalu Login author (token otomatis tersimpan ke variabel access_token/refresh_token).\n2. Authors - Management > Create event (butuh token).\n3. (Opsional) Events (Guest) > Submit registration bila event punya formulir.\n4. Tickets (Buyer) > Init order lalu Claim.\n\nVariabel koleksi: base_url, x_user_id, access_token, refresh_token, event_id, ticket_code.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080", "type": "string" },
+    { "key": "x_user_id", "value": "1", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "refresh_token", "value": "", "type": "string" },
+    { "key": "event_id", "value": "1", "type": "string" },
+    { "key": "ticket_code", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health-check",
+              "host": ["{{base_url}}"],
+              "path": ["health-check"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/users",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Register user (buyer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@mail.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events (Guest)",
+      "item": [
+        {
+          "name": "List events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/events?page=1&limit=10&search=",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "events"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get one event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "events", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Submit registration (formulir peserta)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{x_user_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@mail.com\",\n  \"answers\": [\n    { \"field_id\": 1, \"value\": [\"Budi Santoso\"] },\n    { \"field_id\": 2, \"value\": [\"Jakarta\"] }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/events/{{event_id}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "events", "{{event_id}}", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets (Buyer)",
+      "item": [
+        {
+          "name": "Init order (reservasi)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{x_user_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-08-25\",\n  \"event_id\": {{event_id}},\n  \"quantity\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/tickets/init-order",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "tickets", "init-order"]
+            }
+          }
+        },
+        {
+          "name": "Claim (purchase)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{x_user_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_id\": {{event_id}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/tickets/claim",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "tickets", "claim"]
+            }
+          }
+        },
+        {
+          "name": "Redeem ticket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticket_code\": \"{{ticket_code}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/tickets/redeem",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "tickets", "redeem"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authors - Auth",
+      "item": [
+        {
+          "name": "Register author",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Penyelenggara\",\n  \"email\": \"author@mail.com\",\n  \"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/register",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login author",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var d = pm.response.json().data;",
+                  "  pm.collectionVariables.set('access_token', d.access_token);",
+                  "  pm.collectionVariables.set('refresh_token', d.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"author@mail.com\",\n  \"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var d = pm.response.json().data;",
+                  "  pm.collectionVariables.set('access_token', d.access_token);",
+                  "  pm.collectionVariables.set('refresh_token', d.refresh_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "refresh"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authors - Management (protected)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/users",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "users"]
+            }
+          }
+        },
+        {
+          "name": "List events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events?page=1&limit=10&search=",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get one event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Create event (+ formulir kustom)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Konser WarTicket", "type": "text" },
+                { "key": "description", "value": "Event uji coba", "type": "text" },
+                { "key": "price", "value": "0", "type": "text" },
+                { "key": "quota", "value": "10", "type": "text" },
+                { "key": "start_date", "value": "2026-08-25T09:00:00Z", "type": "text" },
+                { "key": "end_date", "value": "2026-08-25T13:00:00Z", "type": "text" },
+                { "key": "form_fields", "value": "[{\"label\":\"Nama Lengkap\",\"field_type\":\"text\",\"required\":true,\"position\":1},{\"label\":\"Domisili\",\"field_type\":\"select\",\"required\":true,\"options\":[\"Jakarta\",\"Bandung\",\"Surabaya\"],\"position\":2}]", "type": "text" },
+                { "key": "image_file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events"]
+            }
+          }
+        },
+        {
+          "name": "Get event form",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events/{{event_id}}/form",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events", "{{event_id}}", "form"]
+            }
+          }
+        },
+        {
+          "name": "List event tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events/{{event_id}}/tickets",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events", "{{event_id}}", "tickets"]
+            }
+          }
+        },
+        {
+          "name": "Export event tickets (xlsx)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/api/authors/events/{{event_id}}/tickets/export",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "api", "authors", "events", "{{event_id}}", "tickets", "export"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
