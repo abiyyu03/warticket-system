@@ -9,6 +9,7 @@ type EventService interface {
 	ICreateEvent
 	IGetListEvent
 	IGetEventForm
+	IGetOneEvent
 	ISubmitRegistration
 }
 
