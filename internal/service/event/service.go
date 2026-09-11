@@ -10,7 +10,6 @@ type EventService interface {
 	IGetListEvent
 	IGetEventForm
 	IGetOneEvent
-	ISubmitRegistration
 }
 
 type service struct {

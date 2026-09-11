@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	obEntity "go-projects/hexagonal-example/internal/adapter/outbound/entity"
+	ucEvent "go-projects/hexagonal-example/internal/service/entity/event"
 	ucEntity "go-projects/hexagonal-example/internal/service/entity/ticket"
 
 	"github.com/google/uuid"
@@ -29,6 +30,24 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 	event, err := s.Repository.Event.GetByID(ctx, orm, cachedInitOrder.EventID)
 	if err != nil {
 		return response, err
+	}
+
+	// event ber-form: email peserta + jawaban formulir (payload checkout) wajib &
+	// divalidasi di sini. Event tanpa form melewati langkah ini.
+	formFields, err := s.Repository.Event.GetFormFieldsByEvent(ctx, orm, event.ID)
+	if err != nil {
+		return response, err
+	}
+	registration := ucEvent.SubmitRegistrationRequest{
+		UserID:  userId,
+		EventID: event.ID,
+		Email:   req.Email,
+		Answers: req.Answers,
+	}
+	if len(formFields) > 0 {
+		if err = registration.Validate(formFields); err != nil {
+			return response, err
+		}
 	}
 
 	// masa berlaku tiket: pakai end date kalau event multi-hari, selain itu start date.
@@ -63,6 +82,16 @@ func (s service) Purchase(ctx context.Context, req ucEntity.PurchaseRequest) (uc
 	if err = s.Repository.Transaction.Create(ctx, trx, transaction); err != nil {
 		trx.Rollback()
 		return response, err
+	}
+
+	// registrasi peserta (create-or-update) bila event ber-form; disimpan dalam
+	// transaksi yang sama dengan order.
+	if len(formFields) > 0 {
+		reg := registration.ToObEntity()
+		if err = s.Repository.UserRegistration.Upsert(ctx, trx, &reg); err != nil {
+			trx.Rollback()
+			return response, err
+		}
 	}
 
 	// Free event, issue tickets immediately. Paid event, wait for payment gateway callback to issue tickets.

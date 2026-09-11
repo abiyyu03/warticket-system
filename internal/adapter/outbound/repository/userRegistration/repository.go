@@ -4,7 +4,7 @@ import "go-projects/hexagonal-example/pkg"
 
 type Repository interface {
 	ICreate
-	IExistsByUserEvent
+	IUpsert
 }
 
 type userRegistration struct {

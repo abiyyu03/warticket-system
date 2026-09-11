@@ -20,7 +20,11 @@ func (h *Handler) Purchase(fctx *fiber.Ctx) error {
 
 	response, err := h.Service.Ticket.Purchase(ctx, request.ToUcEntity())
 	if err != nil {
-		return err
+		// mayoritas error di checkout bersifat validasi/bisnis (email/opsi form,
+		// tx_id tidak valid) -> balas 400 dengan pesan jelas.
+		return fctx.Status(fiber.StatusBadRequest).JSON(
+			baseEntity.BaseResponse{}.ToResponse(err.Error(), fiber.StatusBadRequest, nil, nil),
+		)
 	}
 
 	return fctx.Status(fiber.StatusOK).JSON(
