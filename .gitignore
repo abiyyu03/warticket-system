@@ -11,5 +11,4 @@ profile.cov
 go.work
 go.work.sum 
 .env
-/docs/*
-warticket.postman_collection.json
+/docs/* 
