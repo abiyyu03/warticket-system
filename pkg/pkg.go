@@ -5,9 +5,10 @@ import (
 )
 
 type Package struct {
-	DB    *SQL
-	Cache *Redis
-	Log   *Logger
+	DB      *SQL
+	Cache   *Redis
+	Log     *Logger
+	Storage *Storage
 }
 
 func NewPackage() (Package, error) {
@@ -21,6 +22,7 @@ func NewPackage() (Package, error) {
 	var (
 		postgresCfg = config.LoadPostgresConfig()
 		redisCfg    = config.LoadRedisConfig()
+		storageCfg  = config.LoadStorageConfig()
 	)
 
 	sql, err := NewSQL(postgresCfg)
@@ -33,9 +35,15 @@ func NewPackage() (Package, error) {
 		return Package{}, err
 	}
 
+	storage, err := NewStorage(storageCfg)
+	if err != nil {
+		return Package{}, err
+	}
+
 	return Package{
-		DB:    sql,
-		Cache: cache,
-		Log:   logger,
+		DB:      sql,
+		Cache:   cache,
+		Log:     logger,
+		Storage: storage,
 	}, nil
 }

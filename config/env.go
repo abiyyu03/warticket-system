@@ -10,6 +10,7 @@ import (
 type Config struct {
 	PostgresConfig
 	RedisConfig
+	StorageConfig
 }
 
 func InitEnv() {
